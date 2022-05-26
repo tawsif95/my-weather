@@ -1,15 +1,18 @@
-import './App.css';
 import React, { useEffect, useState } from 'react';
-import './components/weather'
 import WeatherCard from './components/weather';
 import { CircularProgress } from '@mui/material';
+
+import './components/weather'
+import './App.css';
 
 const App = () => {
 
   const[lat, setLat] = useState([]);
   const[long, setLong] = useState([]);
   const[data, setData] = useState([]);
+  const[name, setName] = useState("");
   
+
   useEffect(() => {
 
     const fetchData = async () => {
@@ -18,12 +21,16 @@ const App = () => {
         setLat(position.coords.latitude);
         setLong(position.coords.longitude);
       });
-      
-      await fetch(`${process.env.REACT_APP_API_URL}/weather?lat=${lat}&lon=${long}&appid=${process.env.REACT_APP_API_KEY}`)
+
+      await fetch(`${process.env.REACT_APP_API_URL_WEEKLY}lat=${lat}&lon=${long}&exclude=hourly,minutely&appid=${process.env.REACT_APP_API_KEY}`)
         .then(res => res.json())
         .then(res => {
-          console.log(res);
           setData(res);
+        })
+        await fetch(`${process.env.REACT_APP_API_URL}lat=${lat}&lon=${long}&appid=${process.env.REACT_APP_API_KEY}`)
+        .then(res => res.json())
+        .then(res => {
+          setName(res.name);
         })
     };
 
@@ -32,9 +39,10 @@ const App = () => {
 
   return (
     <div className="App">
+
       {
-        (typeof data.main != 'undefined') ? (
-          <WeatherCard weatherData={data}/>
+        (typeof data.current != 'undefined') ? (
+          <WeatherCard weatherData={data} locationName={name}/>
         ) : (
           <div>
             <CircularProgress color="secondary" />
